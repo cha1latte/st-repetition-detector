@@ -722,6 +722,14 @@ function setupEventListeners() {
                 
                 console.log('AI Structure Repetition Detector extension loaded (DOM-based detection)');
                 
+                // Create a manual test function accessible from console
+                window.testRepetitionDetector = function(testMessage) {
+                    console.log('MANUAL TEST - Processing:', testMessage);
+                    checkRepetition(testMessage, false);
+                };
+                
+                console.log('DEBUG - Manual test function created. Use: testRepetitionDetector("your test message")');
+                
                 // Try to hook into SillyTavern's event system
                 console.log('DEBUG - Trying to hook into SillyTavern events...');
                 
