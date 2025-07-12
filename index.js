@@ -603,11 +603,23 @@ function setupEventListeners() {
                                                              node.classList?.contains('human') ||
                                                              node.querySelector?.('.human');
                                         
-                                        console.log('DEBUG - Node classes:', node.className);
-                                        console.log('DEBUG - Is user message:', isUserMessage);
-                                        console.log('DEBUG - Message preview:', (node.textContent || '').substring(0, 50));
+                                        // Additional content-based detection for user messages
+                                        const messagePreview = (node.textContent || '').trim();
+                                        const isUserBasedOnContent = 
+                                            messagePreview.includes('"Please give me') ||
+                                            messagePreview.includes('1/1') ||
+                                            messagePreview.endsWith('?') && messagePreview.length < 100 ||
+                                            /^[\"\'].*[\"\']$/.test(messagePreview.substring(0, 200)); // Quoted text
                                         
-                                        if (!isUserMessage) {
+                                        const finalIsUserMessage = isUserMessage || isUserBasedOnContent;
+                                        
+                                        console.log('DEBUG - Node classes:', node.className);
+                                        console.log('DEBUG - CSS-based user:', isUserMessage);
+                                        console.log('DEBUG - Content-based user:', isUserBasedOnContent);
+                                        console.log('DEBUG - Final is user:', finalIsUserMessage);
+                                        console.log('DEBUG - Message preview:', messagePreview.substring(0, 50));
+                                        
+                                        if (!finalIsUserMessage) {
                                             const messageText = node.textContent || node.innerText;
                                             const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                                             
