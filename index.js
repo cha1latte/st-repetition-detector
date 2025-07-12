@@ -223,8 +223,18 @@ function checkRepetition(text, isUser = false) {
         return;
     }
     
-    // Skip very short messages
-    if (cleanText.length < 20) {
+    // Skip very short messages or system messages
+    if (cleanText.length < 50) {
+        return;
+    }
+    
+    // Skip system messages, timestamps, and UI elements
+    const isSystemMessage = /^#\d+$/.test(cleanText) || 
+                           /^\d+\.\d+s$/.test(cleanText) || 
+                           /^[\d\s\.\#\:]+$/.test(cleanText) || 
+                           !cleanText.includes(' ');
+    
+    if (isSystemMessage) {
         return;
     }
     
@@ -604,9 +614,19 @@ function setupEventListeners() {
                                         
                                         if (!isUserMessage) {
                                             const messageText = node.textContent || node.innerText;
-                                            if (messageText && messageText.trim().length > 20) {
+                                            const cleanText = messageText ? messageText.trim() : '';
+                                            
+                                            // Filter out system messages, timestamps, and UI elements
+                                            const isSystemMessage = /^#\d+$/.test(cleanText) || // "#0", "#1", etc.
+                                                                   /^\d+\.\d+s$/.test(cleanText) || // "5.8s", "1.9s", etc.
+                                                                   /^[\d\s\.\#\:]+$/.test(cleanText) || // Only numbers/symbols
+                                                                   cleanText.length < 50 || // Too short to be real message
+                                                                   !cleanText.includes(' '); // No spaces = not a sentence
+                                            
+                                            if (!isSystemMessage && cleanText.length > 50) {
                                                 console.log('Repetition detector: New AI message detected via observer');
-                                                setTimeout(() => checkRepetition(messageText.trim(), false), 500);
+                                                console.log('Message preview:', cleanText.substring(0, 100) + '...');
+                                                setTimeout(() => checkRepetition(cleanText, false), 500);
                                             }
                                         }
                                     }
@@ -633,10 +653,20 @@ function setupEventListeners() {
                         const newMessage = messages[messages.length - 1];
                         const messageText = newMessage.textContent || newMessage.innerText;
                         
-                        if (messageText && messageText.trim().length > 20 && messageText.trim() !== lastMessageText) {
+                        const cleanText = messageText ? messageText.trim() : '';
+                        
+                        // Apply same filtering as observer
+                        const isSystemMessage = /^#\d+$/.test(cleanText) || 
+                                               /^\d+\.\d+s$/.test(cleanText) || 
+                                               /^[\d\s\.\#\:]+$/.test(cleanText) || 
+                                               cleanText.length < 50 || 
+                                               !cleanText.includes(' ');
+                        
+                        if (!isSystemMessage && cleanText.length > 50 && cleanText !== lastMessageText) {
                             console.log('Repetition detector: New message detected via polling');
-                            checkRepetition(messageText.trim(), false);
-                            lastMessageText = messageText.trim();
+                            console.log('Message preview:', cleanText.substring(0, 100) + '...');
+                            checkRepetition(cleanText, false);
+                            lastMessageText = cleanText;
                         }
                         lastMessageCount = messages.length;
                     }
