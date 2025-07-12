@@ -544,45 +544,83 @@ function setupEventListeners() {
                 console.error('Repetition detector: Error during initialization:', error);
             }
             
-            // Wait for globals to be available
-            let retryCount = 0;
-            const maxRetries = 20; // Stop after 10 seconds
-            const waitForGlobals = () => {
-                retryCount++;
+            // Alternative message detection using DOM observation
+            console.log('Repetition detector: Setting up DOM-based message detection');
+            
+            // Function to set up message detection
+            const setupMessageDetection = () => {
+                // Look for chat container
+                const chatContainer = document.querySelector('#chat') || 
+                                    document.querySelector('.chat') || 
+                                    document.querySelector('[id*="chat"]') ||
+                                    document.querySelector('[class*="chat"]');
                 
-                if (typeof eventSource !== 'undefined' && typeof SlashCommandParser !== 'undefined') {
-                    console.log('Repetition detector: Globals available, setting up event listeners');
-                    
-                    // Listen for new messages
-                    eventSource.on(event_types.MESSAGE_RECEIVED, (data) => {
-                        if (data && data.message && data.message.mes) {
-                            checkRepetition(data.message.mes, false);
+                if (!chatContainer) {
+                    console.log('Repetition detector: Chat container not found, will retry...');
+                    setTimeout(setupMessageDetection, 1000);
+                    return;
+                }
+                
+                console.log('Repetition detector: Found chat container, setting up observer');
+                
+                // Set up mutation observer to watch for new messages
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    // Look for AI message indicators
+                                    const isAIMessage = node.classList?.contains('character') ||
+                                                      node.querySelector?.('.character') ||
+                                                      node.classList?.contains('assistant') ||
+                                                      node.querySelector?.('.assistant') ||
+                                                      (!node.classList?.contains('user') && 
+                                                       !node.querySelector?.('.user') &&
+                                                       node.textContent?.trim()?.length > 10);
+                                    
+                                    if (isAIMessage) {
+                                        const messageText = node.textContent || node.innerText;
+                                        if (messageText && messageText.trim().length > 10) {
+                                            console.log('Repetition detector: New AI message detected');
+                                            setTimeout(() => checkRepetition(messageText.trim(), false), 100);
+                                        }
+                                    }
+                                }
+                            });
                         }
                     });
-                    
-                    // Slash command for manual check
-                    SlashCommandParser.addCommandObject({
-                        name: 'check-repetition',
-                        callback: () => {
-                            if (messageHistory.length > 0) {
-                                checkRepetition(messageHistory[messageHistory.length - 1], false);
+                });
+                
+                // Start observing chat container
+                observer.observe(chatContainer, {
+                    childList: true,
+                    subtree: true
+                });
+                
+                console.log('AI Structure Repetition Detector extension loaded (DOM-based detection)');
+                
+                // Simple polling backup - check for new messages every 2 seconds
+                let lastMessageCount = 0;
+                setInterval(() => {
+                    const messages = chatContainer.querySelectorAll('[class*="mes"]');
+                    if (messages.length > lastMessageCount) {
+                        const newMessage = messages[messages.length - 1];
+                        const isUser = newMessage.classList.contains('user') || 
+                                      newMessage.querySelector('.user');
+                        
+                        if (!isUser) {
+                            const messageText = newMessage.textContent || newMessage.innerText;
+                            if (messageText && messageText.trim().length > 10) {
+                                console.log('Repetition detector: New message detected via polling');
+                                checkRepetition(messageText.trim(), false);
                             }
-                            return '';
-                        },
-                        helpString: 'Manually check the last message for repetitive patterns'
-                    });
-                    
-                    console.log('AI Structure Repetition Detector extension loaded');
-                } else if (retryCount < maxRetries) {
-                    console.log(`Repetition detector: Globals not ready yet, will retry... (${retryCount}/${maxRetries})`);
-                    setTimeout(waitForGlobals, 500);
-                } else {
-                    console.error('Repetition detector: Failed to find SillyTavern globals after 10 seconds. Extension partially loaded (settings only).');
-                    console.error('Available globals:', Object.keys(window).filter(k => k.includes('event') || k.includes('Slash')));
-                }
+                        }
+                        lastMessageCount = messages.length;
+                    }
+                }, 2000);
             };
             
-            waitForGlobals();
+            setupMessageDetection();
         }, 1000); // Wait 1 second for SillyTavern to initialize
     });
 
