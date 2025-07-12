@@ -610,13 +610,22 @@ function setupEventListeners() {
                                             console.log('ALWAYS DEBUG - Raw message:', cleanText.substring(0, 100));
                                             
                                             // Extract actual message content by removing metadata pattern
-                                            // Pattern: "#0 Name July 12, 2025 6:45 PM Thinking... Actual message content"
-                                            const metadataPattern = /^#\d+\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
-                                            const actualMessage = cleanText.replace(metadataPattern, '').trim();
+                                            // Patterns: 
+                                            // "#0 Bambi July 12, 2025 6:56 PM Thinking... test message"
+                                            // "#1 5.3s Assistant July 12, 2025 6:56 PM Thinking....."
+                                            const metadataPattern1 = /^#\d+\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
+                                            const metadataPattern2 = /^#\d+\s+\d+\.\d+s\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
+                                            
+                                            let actualMessage = cleanText.replace(metadataPattern1, '').trim();
+                                            if (actualMessage === cleanText.trim()) {
+                                                // First pattern didn't match, try second pattern
+                                                actualMessage = cleanText.replace(metadataPattern2, '').trim();
+                                            }
                                             
                                             console.log('DEBUG - Original text:', cleanText.substring(0, 100));
                                             console.log('DEBUG - After regex:', actualMessage.substring(0, 100));
-                                            console.log('DEBUG - Regex matched:', metadataPattern.test(cleanText));
+                                            console.log('DEBUG - Pattern1 matched:', metadataPattern1.test(cleanText));
+                                            console.log('DEBUG - Pattern2 matched:', metadataPattern2.test(cleanText));
                                             
                                             // Skip if it's purely system metadata or too short
                                             const isSystemMessage = /^#\d+\s*$/.test(cleanText) || // Pure "#0", "#1", etc.
@@ -662,8 +671,13 @@ function setupEventListeners() {
                         const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                         
                         // Extract actual message content by removing metadata pattern
-                        const metadataPattern = /^#\d+\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
-                        const actualMessage = cleanText.replace(metadataPattern, '').trim();
+                        const metadataPattern1 = /^#\d+\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
+                        const metadataPattern2 = /^#\d+\s+\d+\.\d+s\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
+                        
+                        let actualMessage = cleanText.replace(metadataPattern1, '').trim();
+                        if (actualMessage === cleanText.trim()) {
+                            actualMessage = cleanText.replace(metadataPattern2, '').trim();
+                        }
                         
                         // Apply same filtering as observer
                         const isSystemMessage = /^#\d+\s*$/.test(cleanText) || 
