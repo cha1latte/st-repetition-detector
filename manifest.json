@@ -1,0 +1,9 @@
+{
+  "display_name": "AI Repetition Detector",
+  "author": "Anonymous",
+  "version": "1.0.0",
+  "js": "index.js",
+  "css": "style.css",
+  "description": "Detects repetitive AI language patterns and alerts users",
+  "loading_order": 50
+}

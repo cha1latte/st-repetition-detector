@@ -1,0 +1,85 @@
+#repetition-detector-settings {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.repetition-detector-block {
+    padding: 10px;
+}
+
+.repetition-settings-group {
+    margin: 15px 0;
+}
+
+.repetition-settings-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.repetition-settings-group .flex-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.repetition-settings-group .slider {
+    flex: 1;
+    margin: 0;
+}
+
+.repetition-settings-group .range-value {
+    min-width: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: var(--SmartThemeEmColor);
+}
+
+.repetition-settings-group h4 {
+    margin-bottom: 10px;
+    margin-top: 20px;
+    color: var(--SmartThemeEmColor);
+    border-bottom: 1px solid var(--SmartThemeBorderColor);
+    padding-bottom: 5px;
+}
+
+.repetition-settings-group .checkbox_label {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    cursor: pointer;
+}
+
+.repetition-settings-group .checkbox_label input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.repetition-settings-group .checkbox_label span {
+    color: var(--SmartThemeEmColor);
+}
+
+.repetition-settings-group .notes {
+    color: var(--SmartThemeEmColor);
+    font-style: italic;
+    display: block;
+    margin-bottom: 10px;
+}
+
+#rd_clear_history {
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+/* Toast notification styling */
+.toast-warning {
+    background-color: #ff9800 !important;
+    color: white !important;
+    max-width: 400px;
+    white-space: pre-line;
+}
+
+.toast-top-center {
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+}
