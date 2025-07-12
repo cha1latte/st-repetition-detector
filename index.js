@@ -225,6 +225,21 @@ function checkRepetition(text, isUser = false) {
     
     // Skip if we just processed this exact message or if called too frequently
     if (cleanText === lastProcessedMessage || (currentTime - lastProcessedTime) < 1000) {
+        console.log('DEBUG - Skipping duplicate or too frequent call');
+        return;
+    }
+    
+    // Skip SillyTavern UI elements and toast notifications
+    if (cleanText.includes('⚠️ Repetitive AI structure detected') ||
+        cleanText.includes('API Connections') ||
+        cleanText.includes('Chat History') ||
+        cleanText.includes('Group Controls') ||
+        cleanText.includes('SillyTavern 1.') ||
+        cleanText.includes('Upload sprite pack') ||
+        cleanText.includes('Vectorize All') ||
+        cleanText.includes('Processed 0% of messages') ||
+        cleanText.length < 10) {
+        console.log('DEBUG - Skipping UI element:', cleanText.substring(0, 30));
         return;
     }
     
@@ -759,8 +774,8 @@ function setupEventListeners() {
                     });
                 };
                 
-                // Start aggressive polling
-                setInterval(scanForNewMessages, 2000);
+                // DISABLED - aggressive polling was processing UI elements and creating infinite loops
+                // setInterval(scanForNewMessages, 2000);
                 
                 // Polling backup - check for new messages every 3 seconds
                 let lastMessageCount = 0;
