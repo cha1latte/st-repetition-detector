@@ -593,11 +593,22 @@ function setupEventListeners() {
             
             // Function to set up message detection
             const setupMessageDetection = () => {
+                console.log('DEBUG - Attempting to find chat container...');
+                
                 // Look for chat container
                 const chatContainer = document.querySelector('#chat') || 
                                     document.querySelector('.chat') || 
                                     document.querySelector('[id*="chat"]') ||
                                     document.querySelector('[class*="chat"]');
+                
+                console.log('DEBUG - Chat container found:', !!chatContainer);
+                if (chatContainer) {
+                    console.log('DEBUG - Chat container details:', {
+                        id: chatContainer.id,
+                        className: chatContainer.className,
+                        children: chatContainer.children.length
+                    });
+                }
                 
                 if (!chatContainer) {
                     console.log('Repetition detector: Chat container not found, will retry...');
@@ -609,9 +620,12 @@ function setupEventListeners() {
                 
                 // Set up mutation observer to watch for new messages
                 const observer = new MutationObserver((mutations) => {
-                    mutations.forEach((mutation) => {
+                    console.log('DEBUG - Observer triggered, mutations:', mutations.length);
+                    mutations.forEach((mutation, i) => {
+                        console.log(`DEBUG - Mutation ${i}: type=${mutation.type}, addedNodes=${mutation.addedNodes.length}`);
                         if (mutation.type === 'childList') {
-                            mutation.addedNodes.forEach((node) => {
+                            mutation.addedNodes.forEach((node, j) => {
+                                console.log(`DEBUG - Node ${j}: type=${node.nodeType}, tagName=${node.tagName}, className=${node.className}`);
                                 if (node.nodeType === Node.ELEMENT_NODE) {
                                     // Look for actual message elements (more specific)
                                     const isMessageElement = node.classList?.contains('mes') ||
