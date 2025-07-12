@@ -223,20 +223,8 @@ function checkRepetition(text, isUser = false) {
         return;
     }
     
-    // Skip very short messages or system messages
-    if (cleanText.length < 50) {
-        return;
-    }
-    
-    // Skip system messages, timestamps, and UI elements
-    const normalizedText = cleanText.replace(/\s+/g, ' ');
-    const isSystemMessage = /^#\d+\s*$/.test(normalizedText) || 
-                           /^\d+\.\d+s\s*$/.test(normalizedText) || 
-                           /^[\d\s\.\#\:]+$/.test(normalizedText) || 
-                           !normalizedText.includes(' ') ||
-                           normalizedText.match(/^#\d+\s+\d+\.\d+s\s*$/);
-    
-    if (isSystemMessage) {
+    // Skip very short messages
+    if (cleanText.length < 10) {
         return;
     }
     
@@ -619,20 +607,26 @@ function setupEventListeners() {
                                             const messageText = node.textContent || node.innerText;
                                             const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                                             
-                                            // More robust filtering for system messages, timestamps, and UI elements
-                                            const isSystemMessage = /^#\d+\s*$/.test(cleanText) || // "#0", "#1", etc. with optional whitespace
-                                                                   /^\d+\.\d+s\s*$/.test(cleanText) || // "5.8s", "1.9s", etc.
-                                                                   /^[\d\s\.\#\:]+$/.test(cleanText) || // Only numbers/symbols
-                                                                   cleanText.length < 50 || // Too short to be real message
-                                                                   !cleanText.includes(' ') || // No spaces = not a sentence
-                                                                   cleanText.match(/^#\d+\s+\d+\.\d+s\s*$/); // Combined "#0 5.0s" pattern
+                                            // Extract actual message content by removing metadata pattern
+                                            // Pattern: "#0 Name Date Time Thinking... Actual message content"
+                                            const metadataPattern = /^#\d+\s+[\w\s]+\d{4}\s+\d+:\d+\s+[AP]M\s+Thinking\.+\s*/;
+                                            const actualMessage = cleanText.replace(metadataPattern, '').trim();
                                             
-                                            if (!isSystemMessage && cleanText.length > 50) {
+                                            // Skip if it's purely system metadata or too short
+                                            const isSystemMessage = /^#\d+\s*$/.test(cleanText) || // Pure "#0", "#1", etc.
+                                                                   /^\d+\.\d+s\s*$/.test(cleanText) || // Pure timestamps
+                                                                   /^[\d\s\.\#\:]+$/.test(cleanText) || // Only numbers/symbols
+                                                                   actualMessage.length < 10 || // Too short after metadata removal
+                                                                   !actualMessage || // Nothing left after metadata removal
+                                                                   cleanText.match(/^#\d+\s+\d+\.\d+s\s*$/); // Pure "#0 5.0s" pattern
+                                            
+                                            if (!isSystemMessage && actualMessage.length > 10) {
                                                 console.log('Repetition detector: New AI message detected via observer');
-                                                console.log('Message preview:', cleanText.substring(0, 100) + '...');
-                                                setTimeout(() => checkRepetition(cleanText, false), 500);
+                                                console.log('Original:', cleanText.substring(0, 80) + '...');
+                                                console.log('Extracted:', actualMessage.substring(0, 80) + '...');
+                                                setTimeout(() => checkRepetition(actualMessage, false), 500);
                                             } else {
-                                                console.log('Repetition detector: Filtered out system message:', JSON.stringify(cleanText.substring(0, 30)));
+                                                console.log('Repetition detector: Filtered out system message:', JSON.stringify(cleanText.substring(0, 50)));
                                             }
                                         }
                                     }
@@ -661,19 +655,23 @@ function setupEventListeners() {
                         
                         const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                         
+                        // Extract actual message content by removing metadata pattern
+                        const metadataPattern = /^#\d+\s+[\w\s]+\d{4}\s+\d+:\d+\s+[AP]M\s+Thinking\.+\s*/;
+                        const actualMessage = cleanText.replace(metadataPattern, '').trim();
+                        
                         // Apply same filtering as observer
                         const isSystemMessage = /^#\d+\s*$/.test(cleanText) || 
                                                /^\d+\.\d+s\s*$/.test(cleanText) || 
                                                /^[\d\s\.\#\:]+$/.test(cleanText) || 
-                                               cleanText.length < 50 || 
-                                               !cleanText.includes(' ') ||
+                                               actualMessage.length < 10 || 
+                                               !actualMessage ||
                                                cleanText.match(/^#\d+\s+\d+\.\d+s\s*$/);
                         
-                        if (!isSystemMessage && cleanText.length > 50 && cleanText !== lastMessageText) {
+                        if (!isSystemMessage && actualMessage.length > 10 && actualMessage !== lastMessageText) {
                             console.log('Repetition detector: New message detected via polling');
-                            console.log('Message preview:', cleanText.substring(0, 100) + '...');
-                            checkRepetition(cleanText, false);
-                            lastMessageText = cleanText;
+                            console.log('Extracted message:', actualMessage.substring(0, 100) + '...');
+                            checkRepetition(actualMessage, false);
+                            lastMessageText = actualMessage;
                         }
                         lastMessageCount = messages.length;
                     }
