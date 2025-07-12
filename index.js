@@ -393,6 +393,7 @@ function showRepetitionAlert(patterns) {
 // Load template with fallback paths
 async function loadTemplate() {
     const templatePaths = [
+        '/scripts/extensions/third-party/st-repetition-detector/settings.html',
         '/scripts/extensions/third-party/repetition-detector/settings.html',
         '/scripts/extensions/repetition-detector/settings.html',
         './settings.html'
