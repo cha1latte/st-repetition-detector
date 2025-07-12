@@ -722,6 +722,45 @@ function setupEventListeners() {
                 
                 console.log('AI Structure Repetition Detector extension loaded (DOM-based detection)');
                 
+                // Try to hook into SillyTavern's event system
+                console.log('DEBUG - Trying to hook into SillyTavern events...');
+                
+                // Method 1: Try to listen for SillyTavern's message events
+                if (typeof eventSource !== 'undefined') {
+                    console.log('DEBUG - eventSource available, adding listeners');
+                    eventSource.on('messageSent', (data) => {
+                        console.log('DEBUG - messageSent event:', data);
+                    });
+                    
+                    eventSource.on('messageReceived', (data) => {
+                        console.log('DEBUG - messageReceived event:', data);
+                        if (data && data.message && !data.isUser) {
+                            console.log('DEBUG - Processing AI message from event:', data.message.substring(0, 50));
+                            setTimeout(() => checkRepetition(data.message, false), 500);
+                        }
+                    });
+                    
+                    eventSource.on('chatChanged', () => {
+                        console.log('DEBUG - chatChanged event - resetting message history');
+                        messageHistory = [];
+                    });
+                } else {
+                    console.log('DEBUG - eventSource not available');
+                }
+                
+                // Method 2: Try global event listeners
+                document.addEventListener('chatMessageAdded', (event) => {
+                    console.log('DEBUG - chatMessageAdded event:', event.detail);
+                    if (event.detail && event.detail.message && !event.detail.isUser) {
+                        setTimeout(() => checkRepetition(event.detail.message, false), 500);
+                    }
+                });
+                
+                // Method 3: Try window events
+                window.addEventListener('sillyTavernMessage', (event) => {
+                    console.log('DEBUG - sillyTavernMessage event:', event.detail);
+                });
+                
                 // Enhanced polling backup - more aggressive scanning
                 let lastScanTime = 0;
                 const scanForNewMessages = () => {
