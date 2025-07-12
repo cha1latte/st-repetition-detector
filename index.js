@@ -707,6 +707,61 @@ function setupEventListeners() {
                 
                 console.log('AI Structure Repetition Detector extension loaded (DOM-based detection)');
                 
+                // Enhanced polling backup - more aggressive scanning
+                let lastScanTime = 0;
+                const scanForNewMessages = () => {
+                    const currentTime = Date.now();
+                    if (currentTime - lastScanTime < 1000) return; // Prevent too frequent scanning
+                    lastScanTime = currentTime;
+                    
+                    console.log('DEBUG - Polling scan for new messages...');
+                    
+                    // Try multiple selectors to find messages
+                    const messageSelectors = [
+                        '.mes:not(.user)',
+                        '[class*="mes"]:not([class*="user"])',
+                        '.message:not(.user)',
+                        '[class*="message"]:not([class*="user"])',
+                        '[id*="chat"] > div',
+                        '#chat .message-content',
+                        '.chat-message:not(.user-message)'
+                    ];
+                    
+                    let allMessages = [];
+                    messageSelectors.forEach(selector => {
+                        try {
+                            const elements = Array.from(document.querySelectorAll(selector));
+                            allMessages = allMessages.concat(elements);
+                            console.log(`DEBUG - Selector "${selector}" found ${elements.length} elements`);
+                        } catch (e) {
+                            console.log(`DEBUG - Selector "${selector}" failed:`, e);
+                        }
+                    });
+                    
+                    console.log(`DEBUG - Total potential messages found: ${allMessages.length}`);
+                    
+                    // Process each potential message
+                    allMessages.forEach((element, i) => {
+                        const messageText = element.textContent || element.innerText || '';
+                        const cleanText = messageText.trim();
+                        
+                        if (cleanText.length > 20) {
+                            console.log(`DEBUG - Message ${i}:`, cleanText.substring(0, 80) + '...');
+                            
+                            // Try to process this message
+                            if (!cleanText.includes('Please give me') && !cleanText.includes('1/1')) {
+                                console.log('DEBUG - Processing as potential AI message');
+                                setTimeout(() => checkRepetition(cleanText, false), 100);
+                            } else {
+                                console.log('DEBUG - Skipping as likely user message');
+                            }
+                        }
+                    });
+                };
+                
+                // Start aggressive polling
+                setInterval(scanForNewMessages, 2000);
+                
                 // Polling backup - check for new messages every 3 seconds
                 let lastMessageCount = 0;
                 let lastMessageText = '';
