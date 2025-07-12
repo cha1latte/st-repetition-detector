@@ -229,10 +229,12 @@ function checkRepetition(text, isUser = false) {
     }
     
     // Skip system messages, timestamps, and UI elements
-    const isSystemMessage = /^#\d+$/.test(cleanText) || 
-                           /^\d+\.\d+s$/.test(cleanText) || 
-                           /^[\d\s\.\#\:]+$/.test(cleanText) || 
-                           !cleanText.includes(' ');
+    const normalizedText = cleanText.replace(/\s+/g, ' ');
+    const isSystemMessage = /^#\d+\s*$/.test(normalizedText) || 
+                           /^\d+\.\d+s\s*$/.test(normalizedText) || 
+                           /^[\d\s\.\#\:]+$/.test(normalizedText) || 
+                           !normalizedText.includes(' ') ||
+                           normalizedText.match(/^#\d+\s+\d+\.\d+s\s*$/);
     
     if (isSystemMessage) {
         return;
@@ -614,19 +616,22 @@ function setupEventListeners() {
                                         
                                         if (!isUserMessage) {
                                             const messageText = node.textContent || node.innerText;
-                                            const cleanText = messageText ? messageText.trim() : '';
+                                            const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                                             
-                                            // Filter out system messages, timestamps, and UI elements
-                                            const isSystemMessage = /^#\d+$/.test(cleanText) || // "#0", "#1", etc.
-                                                                   /^\d+\.\d+s$/.test(cleanText) || // "5.8s", "1.9s", etc.
+                                            // More robust filtering for system messages, timestamps, and UI elements
+                                            const isSystemMessage = /^#\d+\s*$/.test(cleanText) || // "#0", "#1", etc. with optional whitespace
+                                                                   /^\d+\.\d+s\s*$/.test(cleanText) || // "5.8s", "1.9s", etc.
                                                                    /^[\d\s\.\#\:]+$/.test(cleanText) || // Only numbers/symbols
                                                                    cleanText.length < 50 || // Too short to be real message
-                                                                   !cleanText.includes(' '); // No spaces = not a sentence
+                                                                   !cleanText.includes(' ') || // No spaces = not a sentence
+                                                                   cleanText.match(/^#\d+\s+\d+\.\d+s\s*$/); // Combined "#0 5.0s" pattern
                                             
                                             if (!isSystemMessage && cleanText.length > 50) {
                                                 console.log('Repetition detector: New AI message detected via observer');
                                                 console.log('Message preview:', cleanText.substring(0, 100) + '...');
                                                 setTimeout(() => checkRepetition(cleanText, false), 500);
+                                            } else {
+                                                console.log('Repetition detector: Filtered out system message:', JSON.stringify(cleanText.substring(0, 30)));
                                             }
                                         }
                                     }
@@ -653,14 +658,15 @@ function setupEventListeners() {
                         const newMessage = messages[messages.length - 1];
                         const messageText = newMessage.textContent || newMessage.innerText;
                         
-                        const cleanText = messageText ? messageText.trim() : '';
+                        const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                         
                         // Apply same filtering as observer
-                        const isSystemMessage = /^#\d+$/.test(cleanText) || 
-                                               /^\d+\.\d+s$/.test(cleanText) || 
+                        const isSystemMessage = /^#\d+\s*$/.test(cleanText) || 
+                                               /^\d+\.\d+s\s*$/.test(cleanText) || 
                                                /^[\d\s\.\#\:]+$/.test(cleanText) || 
                                                cleanText.length < 50 || 
-                                               !cleanText.includes(' ');
+                                               !cleanText.includes(' ') ||
+                                               cleanText.match(/^#\d+\s+\d+\.\d+s\s*$/);
                         
                         if (!isSystemMessage && cleanText.length > 50 && cleanText !== lastMessageText) {
                             console.log('Repetition detector: New message detected via polling');
