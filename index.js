@@ -603,6 +603,10 @@ function setupEventListeners() {
                                                              node.classList?.contains('human') ||
                                                              node.querySelector?.('.human');
                                         
+                                        console.log('DEBUG - Node classes:', node.className);
+                                        console.log('DEBUG - Is user message:', isUserMessage);
+                                        console.log('DEBUG - Message preview:', (node.textContent || '').substring(0, 50));
+                                        
                                         if (!isUserMessage) {
                                             const messageText = node.textContent || node.innerText;
                                             const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
