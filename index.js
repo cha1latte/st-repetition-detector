@@ -255,14 +255,15 @@ function checkRepetition(text, isUser = false) {
     
     const { windowSize, threshold } = sensitivityMap[settings.sensitivity] || sensitivityMap[2];
     
-    // Add message to history
-    messageHistory.push(text);
+    // Add message to history ONLY after passing all filtering
+    messageHistory.push(cleanText);  // Use cleanText instead of original text
     if (messageHistory.length > windowSize) {
         messageHistory.shift();
     }
     
     // Only check if we have enough messages
     if (messageHistory.length < 3) {
+        console.log('Repetition detector: Not enough messages yet, need 3, have:', messageHistory.length);
         isProcessing = false;
         return;
     }
