@@ -209,8 +209,13 @@ function analyzeDialoguePattern(text) {
 
 // Check for repetitive patterns
 function checkRepetition(text, isUser = false) {
+    console.log('DEBUG - checkRepetition called with:', text.substring(0, 50), 'isUser:', isUser);
+    
     const settings = getSettings();
+    console.log('DEBUG - Settings enabled:', settings.enabled, 'isProcessing:', isProcessing);
+    
     if (!settings.enabled || isUser || isProcessing) {
+        console.log('DEBUG - Exiting early: enabled=', settings.enabled, 'isUser=', isUser, 'isProcessing=', isProcessing);
         return;
     }
     
@@ -638,8 +643,10 @@ function setupEventListeners() {
                                         console.log('DEBUG - Message preview:', messagePreview.substring(0, 50));
                                         
                                         if (!finalIsUserMessage) {
+                                            console.log('DEBUG - Processing AI message in observer');
                                             const messageText = node.textContent || node.innerText;
                                             const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
+                                            console.log('DEBUG - Raw message text:', cleanText.substring(0, 100));
                                             
                                             // Extract actual message content by removing metadata pattern
                                             // Patterns: 
