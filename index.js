@@ -607,8 +607,6 @@ function setupEventListeners() {
                                             const messageText = node.textContent || node.innerText;
                                             const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                                             
-                                            console.log('ALWAYS DEBUG - Raw message:', cleanText.substring(0, 100));
-                                            
                                             // Extract actual message content by removing metadata pattern
                                             // Patterns: 
                                             // "#0 Bambi July 12, 2025 6:56 PM Thinking... test message"
@@ -621,11 +619,6 @@ function setupEventListeners() {
                                                 // First pattern didn't match, try second pattern
                                                 actualMessage = cleanText.replace(metadataPattern2, '').trim();
                                             }
-                                            
-                                            console.log('DEBUG - Original text:', cleanText.substring(0, 100));
-                                            console.log('DEBUG - After regex:', actualMessage.substring(0, 100));
-                                            console.log('DEBUG - Pattern1 matched:', metadataPattern1.test(cleanText));
-                                            console.log('DEBUG - Pattern2 matched:', metadataPattern2.test(cleanText));
                                             
                                             // Skip if it's purely system metadata or too short
                                             const isSystemMessage = /^#\d+\s*$/.test(cleanText) || // Pure "#0", "#1", etc.
