@@ -608,9 +608,13 @@ function setupEventListeners() {
                                             const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                                             
                                             // Extract actual message content by removing metadata pattern
-                                            // Pattern: "#0 Name Date Time Thinking... Actual message content"
-                                            const metadataPattern = /^#\d+\s+[\w\s]+\d{4}\s+\d+:\d+\s+[AP]M\s+Thinking\.+\s*/;
+                                            // Pattern: "#0 Name July 12, 2025 6:45 PM Thinking... Actual message content"
+                                            const metadataPattern = /^#\d+\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
                                             const actualMessage = cleanText.replace(metadataPattern, '').trim();
+                                            
+                                            console.log('DEBUG - Original text:', cleanText.substring(0, 100));
+                                            console.log('DEBUG - After regex:', actualMessage.substring(0, 100));
+                                            console.log('DEBUG - Regex matched:', metadataPattern.test(cleanText));
                                             
                                             // Skip if it's purely system metadata or too short
                                             const isSystemMessage = /^#\d+\s*$/.test(cleanText) || // Pure "#0", "#1", etc.
@@ -656,7 +660,7 @@ function setupEventListeners() {
                         const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                         
                         // Extract actual message content by removing metadata pattern
-                        const metadataPattern = /^#\d+\s+[\w\s]+\d{4}\s+\d+:\d+\s+[AP]M\s+Thinking\.+\s*/;
+                        const metadataPattern = /^#\d+\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
                         const actualMessage = cleanText.replace(metadataPattern, '').trim();
                         
                         // Apply same filtering as observer
