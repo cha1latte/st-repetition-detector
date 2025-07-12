@@ -607,6 +607,8 @@ function setupEventListeners() {
                                             const messageText = node.textContent || node.innerText;
                                             const cleanText = messageText ? messageText.trim().replace(/\s+/g, ' ') : '';
                                             
+                                            console.log('ALWAYS DEBUG - Raw message:', cleanText.substring(0, 100));
+                                            
                                             // Extract actual message content by removing metadata pattern
                                             // Pattern: "#0 Name July 12, 2025 6:45 PM Thinking... Actual message content"
                                             const metadataPattern = /^#\d+\s+\w+\s+\w+\s+\d{1,2},\s+\d{4}\s+\d{1,2}:\d{2}\s+[AP]M\s+Thinking\.+\s*/;
