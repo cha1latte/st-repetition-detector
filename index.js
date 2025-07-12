@@ -30,6 +30,8 @@ const MODULE_NAME = 'repetition-detector';
     let messageHistory = [];
     let patternCounts = {};
     let isProcessing = false;
+    let lastProcessedMessage = '';
+    let lastProcessedTime = 0;
 
     // Load settings with multiple fallbacks
     function loadSettings() {
@@ -212,7 +214,25 @@ function checkRepetition(text, isUser = false) {
         return;
     }
     
+    // Prevent duplicate processing of the same message
+    const currentTime = Date.now();
+    const cleanText = text.trim();
+    
+    // Skip if we just processed this exact message or if called too frequently
+    if (cleanText === lastProcessedMessage || (currentTime - lastProcessedTime) < 1000) {
+        return;
+    }
+    
+    // Skip very short messages
+    if (cleanText.length < 20) {
+        return;
+    }
+    
+    lastProcessedMessage = cleanText;
+    lastProcessedTime = currentTime;
     isProcessing = true;
+    
+    console.log('Repetition detector: Processing message:', cleanText.substring(0, 50) + '...');
     
     // Map sensitivity to practical values
     const sensitivityMap = {
@@ -569,20 +589,25 @@ function setupEventListeners() {
                         if (mutation.type === 'childList') {
                             mutation.addedNodes.forEach((node) => {
                                 if (node.nodeType === Node.ELEMENT_NODE) {
-                                    // Look for AI message indicators
-                                    const isAIMessage = node.classList?.contains('character') ||
-                                                      node.querySelector?.('.character') ||
-                                                      node.classList?.contains('assistant') ||
-                                                      node.querySelector?.('.assistant') ||
-                                                      (!node.classList?.contains('user') && 
-                                                       !node.querySelector?.('.user') &&
-                                                       node.textContent?.trim()?.length > 10);
+                                    // Look for actual message elements (more specific)
+                                    const isMessageElement = node.classList?.contains('mes') ||
+                                                           node.querySelector?.('.mes') ||
+                                                           node.classList?.contains('message') ||
+                                                           node.querySelector?.('.message');
                                     
-                                    if (isAIMessage) {
-                                        const messageText = node.textContent || node.innerText;
-                                        if (messageText && messageText.trim().length > 10) {
-                                            console.log('Repetition detector: New AI message detected');
-                                            setTimeout(() => checkRepetition(messageText.trim(), false), 100);
+                                    if (isMessageElement) {
+                                        // Check if it's NOT a user message
+                                        const isUserMessage = node.classList?.contains('user') ||
+                                                             node.querySelector?.('.user') ||
+                                                             node.classList?.contains('human') ||
+                                                             node.querySelector?.('.human');
+                                        
+                                        if (!isUserMessage) {
+                                            const messageText = node.textContent || node.innerText;
+                                            if (messageText && messageText.trim().length > 20) {
+                                                console.log('Repetition detector: New AI message detected via observer');
+                                                setTimeout(() => checkRepetition(messageText.trim(), false), 500);
+                                            }
                                         }
                                     }
                                 }
@@ -599,25 +624,23 @@ function setupEventListeners() {
                 
                 console.log('AI Structure Repetition Detector extension loaded (DOM-based detection)');
                 
-                // Simple polling backup - check for new messages every 2 seconds
+                // Polling backup - check for new messages every 3 seconds
                 let lastMessageCount = 0;
+                let lastMessageText = '';
                 setInterval(() => {
-                    const messages = chatContainer.querySelectorAll('[class*="mes"]');
+                    const messages = chatContainer.querySelectorAll('[class*="mes"]:not([class*="user"])');
                     if (messages.length > lastMessageCount) {
                         const newMessage = messages[messages.length - 1];
-                        const isUser = newMessage.classList.contains('user') || 
-                                      newMessage.querySelector('.user');
+                        const messageText = newMessage.textContent || newMessage.innerText;
                         
-                        if (!isUser) {
-                            const messageText = newMessage.textContent || newMessage.innerText;
-                            if (messageText && messageText.trim().length > 10) {
-                                console.log('Repetition detector: New message detected via polling');
-                                checkRepetition(messageText.trim(), false);
-                            }
+                        if (messageText && messageText.trim().length > 20 && messageText.trim() !== lastMessageText) {
+                            console.log('Repetition detector: New message detected via polling');
+                            checkRepetition(messageText.trim(), false);
+                            lastMessageText = messageText.trim();
                         }
                         lastMessageCount = messages.length;
                     }
-                }, 2000);
+                }, 3000);
             };
             
             setupMessageDetection();
