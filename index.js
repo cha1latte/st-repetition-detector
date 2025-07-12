@@ -263,6 +263,17 @@ function checkRepetition(text, isUser = false) {
     if (getSettings().checkSentenceStructure) {
         const structures = recentMessages.map(msg => analyzeSentenceStructure(msg)).filter(s => s);
         
+        console.log('DEBUG - Recent messages for analysis:', recentMessages.length);
+        recentMessages.forEach((msg, i) => {
+            console.log(`DEBUG - Message ${i + 1}:`, msg.substring(0, 80) + '...');
+        });
+        
+        console.log('DEBUG - Sentence structures:', structures.map(s => ({
+            pattern: s.pattern,
+            rhythm: s.rhythm,
+            avgLength: s.avgLength
+        })));
+        
         // Check for rhythm patterns
         const rhythmPatterns = {};
         const avgLengthPatterns = {};
@@ -277,15 +288,22 @@ function checkRepetition(text, isUser = false) {
             avgLengthPatterns[lengthRange] = (avgLengthPatterns[lengthRange] || 0) + 1;
         });
         
+        console.log('DEBUG - Rhythm patterns found:', rhythmPatterns);
+        console.log('DEBUG - Threshold needed:', threshold);
+        
         // Alert on rhythm patterns
         Object.entries(rhythmPatterns).forEach(([pattern, count]) => {
+            console.log(`DEBUG - Checking pattern "${pattern}": count=${count}, threshold=${threshold}, length=${pattern.length}`);
             if (count >= threshold && pattern.length > 1) {
+                console.log(`DEBUG - TRIGGERING alert for pattern "${pattern}"`);
                 detectedPatterns.push({
                     type: 'sentence-rhythm',
                     content: pattern,
                     count: count,
                     description: `Sentence rhythm pattern: ${pattern.split('').join('-')} (${count} times)`
                 });
+            } else {
+                console.log(`DEBUG - NOT triggering: count=${count} < threshold=${threshold} OR length=${pattern.length} <= 1`);
             }
         });
         
