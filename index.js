@@ -518,7 +518,9 @@ const MODULE_NAME = 'repetition-detector';
         setTimeout(async () => {
             try {
                 loadSettings();
+                console.log('DEBUG - About to call createSettingsUI');
                 await createSettingsUI();
+                console.log('DEBUG - createSettingsUI completed');
                 
                 // Create test function for console use
                 console.log('DEBUG - About to create test function');
@@ -579,6 +581,7 @@ const MODULE_NAME = 'repetition-detector';
                 setupMessageDetection();
             } catch (error) {
                 console.error('Repetition detector: Error during initialization:', error);
+                console.error('Repetition detector: Error stack:', error.stack);
             }
         }, 1000);
     });
