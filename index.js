@@ -247,7 +247,10 @@ function checkRepetition(text, isUser = false) {
         cleanText.includes('Analyzing') ||
         cleanText.includes('recent AI messages') ||
         cleanText.includes('No AI messages found to analyze') ||
-        cleanText.length < 10;
+        cleanText === 'Thinking...' ||
+        cleanText.startsWith('Thinking') ||
+        /^Manual Check.*Analyzing/.test(cleanText) ||
+        cleanText.length < 20;
         
     if (isUIElement) {
         console.log('DEBUG - Skipping UI element:', cleanText.substring(0, 50));
