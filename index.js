@@ -584,6 +584,7 @@ function updateUIFromSettings() {
 
 // Setup all event listeners
 function setupEventListeners() {
+    console.log('DEBUG - setupEventListeners called');
     const settings = getSettings();
     
     document.getElementById('rd_enabled').addEventListener('change', function() {
