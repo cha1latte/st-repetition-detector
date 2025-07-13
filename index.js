@@ -738,9 +738,11 @@ function setupEventListeners() {
                 
                 console.log('DEBUG - Manual test function created. Use: testRepetitionDetector("your test message")');
                 
-                // Simple message scanning - look for actual AI responses
+                // Start automatic message scanning immediately
+                console.log('DEBUG - Starting automatic message scanning...');
                 let lastCheckedCount = 0;
-                setInterval(() => {
+                
+                const scanForMessages = () => {
                     console.log('DEBUG - Scanning for messages...');
                     
                     // Try multiple selectors to find messages
@@ -776,11 +778,18 @@ function setupEventListeners() {
                         const messageText = newMessage.textContent || '';
                         
                         console.log('DEBUG - Found new AI message via scanning:', messageText.substring(0, 100) + '...');
-                        testRepetitionDetector(messageText.trim());
+                        setTimeout(() => checkRepetition(messageText.trim(), false), 100);
                         
                         lastCheckedCount = aiMessages.length;
                     }
-                }, 5000); // Check every 5 seconds
+                };
+                
+                // Run first scan immediately
+                setTimeout(scanForMessages, 2000);
+                
+                // Then scan every 5 seconds
+                const scanInterval = setInterval(scanForMessages, 5000);
+                console.log('DEBUG - Scan interval started, ID:', scanInterval);
                 
                 // Try to hook into SillyTavern's event system
                 console.log('DEBUG - Trying to hook into SillyTavern events...');
