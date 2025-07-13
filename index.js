@@ -536,7 +536,13 @@ async function createSettingsUI() {
                 updateUIFromSettings();
                 
                 // Setup event listeners
-                setupEventListeners();
+                try {
+                    console.log('DEBUG - About to call setupEventListeners');
+                    setupEventListeners();
+                    console.log('DEBUG - setupEventListeners completed successfully');
+                } catch (error) {
+                    console.error('DEBUG - Error in setupEventListeners:', error);
+                }
                 
                 console.log('Repetition detector UI setup successful');
                 return true;
