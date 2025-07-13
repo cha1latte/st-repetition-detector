@@ -741,25 +741,46 @@ function setupEventListeners() {
                 // Simple message scanning - look for actual AI responses
                 let lastCheckedCount = 0;
                 setInterval(() => {
-                    // Look for AI message elements with specific content patterns
-                    const aiMessages = Array.from(document.querySelectorAll('.mes')).filter(el => {
-                        const text = el.textContent || '';
-                        return text.length > 50 && 
-                               !text.includes('1/1') && 
-                               !text.includes('Please give me') &&
-                               !el.classList.contains('user');
+                    console.log('DEBUG - Scanning for messages...');
+                    
+                    // Try multiple selectors to find messages
+                    const selectors = ['.mes', '[class*="mes"]', '.message', '[class*="message"]', '#chat > div', '#chat div'];
+                    let allElements = [];
+                    
+                    selectors.forEach(selector => {
+                        try {
+                            const elements = Array.from(document.querySelectorAll(selector));
+                            console.log(`DEBUG - Selector "${selector}" found ${elements.length} elements`);
+                            allElements = allElements.concat(elements);
+                        } catch (e) {
+                            console.log(`DEBUG - Selector "${selector}" failed`);
+                        }
                     });
+                    
+                    console.log(`DEBUG - Total elements found: ${allElements.length}`);
+                    
+                    // Filter for potential AI messages
+                    const aiMessages = allElements.filter(el => {
+                        const text = el.textContent || '';
+                        const hasContent = text.length > 50;
+                        const notUser = !text.includes('Bambi') && !text.includes('Please give me') && !text.includes('1/1');
+                        const notTimestamp = !text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/);
+                        
+                        return hasContent && notUser && notTimestamp;
+                    });
+                    
+                    console.log(`DEBUG - Filtered AI messages: ${aiMessages.length}`);
                     
                     if (aiMessages.length > lastCheckedCount) {
                         const newMessage = aiMessages[aiMessages.length - 1];
                         const messageText = newMessage.textContent || '';
                         
-                        console.log('DEBUG - Found new AI message via scanning:', messageText.substring(0, 50) + '...');
+                        console.log('DEBUG - Found new AI message via scanning:', messageText.substring(0, 100) + '...');
                         testRepetitionDetector(messageText.trim());
                         
                         lastCheckedCount = aiMessages.length;
                     }
-                }, 3000); // Check every 3 seconds
+                }, 5000); // Check every 5 seconds
                 
                 // Try to hook into SillyTavern's event system
                 console.log('DEBUG - Trying to hook into SillyTavern events...');
