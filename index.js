@@ -679,6 +679,9 @@ function manualCheckRecentMessages() {
     });
 }
 
+// Expose function globally for console access
+window.manualCheckRecentMessages = manualCheckRecentMessages;
+
     // Initialize extension - use jQuery ready like the working extension
     jQuery(document).ready(function() {
         console.log('Repetition detector: jQuery ready fired');
@@ -817,7 +820,7 @@ function manualCheckRecentMessages() {
                 
                 console.log('AI Structure Repetition Detector extension loaded (DOM-based detection)');
                 
-                // Create a manual test function accessible from console
+                // Create manual test functions accessible from console
                 window.testRepetitionDetector = function(testMessage) {
                     console.log('MANUAL TEST - Processing:', testMessage);
                     checkRepetition(testMessage, false);
