@@ -496,7 +496,7 @@ const MODULE_NAME = 'repetition-detector';
             messageHistory = [];
             
             // Find messages using simpler approach
-            const messages = document.querySelectorAll('.mes');
+            const messages = document.querySelectorAll('.mes, .mes_text');
             const aiMessages = Array.from(messages).filter(el => {
                 const text = el.textContent || '';
                 return text.length > 50 && !text.includes('Bambi') && !text.includes('Please give me');
@@ -544,10 +544,12 @@ const MODULE_NAME = 'repetition-detector';
                                     if (node.nodeType === Node.ELEMENT_NODE) {
                                         const isMessage = node.matches && (
                                             node.matches('.mes') ||
+                                            node.matches('.mes_text') ||
                                             node.matches('[class*="mes"]') ||
                                             node.matches('.message') ||
                                             node.matches('[class*="message"]') ||
                                             node.querySelector('.mes') ||
+                                            node.querySelector('.mes_text') ||
                                             node.querySelector('[class*="mes"]')
                                         );
                                         
