@@ -533,7 +533,13 @@ async function createSettingsUI() {
                 console.log('Repetition detector: Template injected into DOM');
                 
                 // Initialize values from settings
-                updateUIFromSettings();
+                try {
+                    console.log('DEBUG - About to call updateUIFromSettings');
+                    updateUIFromSettings();
+                    console.log('DEBUG - updateUIFromSettings completed');
+                } catch (error) {
+                    console.error('DEBUG - Error in updateUIFromSettings:', error);
+                }
                 
                 // Setup event listeners
                 try {
