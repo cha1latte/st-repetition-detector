@@ -590,6 +590,72 @@ function setupEventListeners() {
         settings.checkDialoguePatterns = this.checked;
         saveSettings();
     });
+    
+    // Manual check button
+    document.getElementById('rd_check_now').addEventListener('click', function() {
+        manualCheckRecentMessages();
+    });
+}
+
+// Manual check function for the UI button
+function manualCheckRecentMessages() {
+    console.log('DEBUG - Manual check button clicked');
+    
+    // Try multiple selectors to find AI messages
+    const selectors = ['.mes', '[class*="mes"]', '.message', '[class*="message"]'];
+    let allMessages = [];
+    
+    selectors.forEach(selector => {
+        try {
+            const elements = Array.from(document.querySelectorAll(selector));
+            allMessages = allMessages.concat(elements);
+        } catch (e) {
+            // Ignore failed selectors
+        }
+    });
+    
+    // Filter for AI messages only
+    const aiMessages = allMessages.filter(el => {
+        const text = el.textContent || '';
+        const hasContent = text.length > 50;
+        const notUser = !text.includes('Bambi') && 
+                       !text.includes('Please give me') && 
+                       !text.includes('1/1') &&
+                       !text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/);
+        
+        return hasContent && notUser;
+    });
+    
+    console.log(`DEBUG - Found ${aiMessages.length} potential AI messages`);
+    
+    if (aiMessages.length === 0) {
+        toastr.info('No AI messages found to analyze.', 'Manual Check');
+        return;
+    }
+    
+    // Get the last 3-5 AI messages
+    const recentMessages = aiMessages.slice(-5);
+    console.log(`DEBUG - Analyzing last ${recentMessages.length} AI messages`);
+    
+    // Clear message history and process each message
+    messageHistory = [];
+    
+    recentMessages.forEach((messageEl, index) => {
+        const messageText = messageEl.textContent || '';
+        const cleanText = messageText.trim();
+        
+        console.log(`DEBUG - Processing message ${index + 1}:`, cleanText.substring(0, 80) + '...');
+        
+        // Add to history and check for patterns
+        setTimeout(() => {
+            checkRepetition(cleanText, false);
+        }, index * 100); // Stagger the calls slightly
+    });
+    
+    // Show feedback that check is running
+    toastr.info(`Analyzing ${recentMessages.length} recent AI messages for patterns...`, 'Manual Check', {
+        timeOut: 3000
+    });
 }
 
     // Initialize extension - use jQuery ready like the working extension
