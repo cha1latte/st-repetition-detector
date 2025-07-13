@@ -944,6 +944,16 @@ function setupEventListeners() {
                 }
                 
                 console.log('DEBUG - Manual test function created. Use: testRepetitionDetector("your test message")');
+                
+                // Create simple working manual check function  
+                window.manualCheckMessages = function() {
+                    console.log('MANUAL CHECK - Starting');
+                    const messages = document.querySelectorAll('.mes');
+                    console.log('Found', messages.length, 'message elements');
+                    return messages.length;
+                };
+                
+                console.log('DEBUG - Simple manual check function created. Use: manualCheckMessages()');
                 console.log('DEBUG - Manual check function created. Use: manualCheckRecentMessages()');
                 
                 // Set up event-driven message detection (no timers)
