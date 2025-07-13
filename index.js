@@ -538,10 +538,13 @@ const MODULE_NAME = 'repetition-detector';
                     const chatContainer = document.querySelector('#chat') || document.querySelector('.mes_block') || document.body;
                     
                     const observer = new MutationObserver((mutations) => {
+                        console.log('DEBUG - MutationObserver triggered, mutations:', mutations.length);
                         mutations.forEach((mutation) => {
                             if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                                console.log('DEBUG - childList mutation with', mutation.addedNodes.length, 'added nodes');
                                 mutation.addedNodes.forEach((node) => {
                                     if (node.nodeType === Node.ELEMENT_NODE) {
+                                        console.log('DEBUG - Processing element node:', node.className || 'no class');
                                         const isMessage = node.matches && (
                                             node.matches('.mes') ||
                                             node.matches('.mes_text') ||
