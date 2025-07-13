@@ -738,58 +738,53 @@ function setupEventListeners() {
                 
                 console.log('DEBUG - Manual test function created. Use: testRepetitionDetector("your test message")');
                 
-                // Start automatic message scanning immediately
-                console.log('DEBUG - Starting automatic message scanning...');
-                let lastCheckedCount = 0;
+                // Set up event-driven message detection (no timers)
+                console.log('DEBUG - Setting up event-driven message detection...');
                 
-                const scanForMessages = () => {
-                    console.log('DEBUG - Scanning for messages...');
-                    
-                    // Try multiple selectors to find messages
-                    const selectors = ['.mes', '[class*="mes"]', '.message', '[class*="message"]', '#chat > div', '#chat div'];
-                    let allElements = [];
-                    
-                    selectors.forEach(selector => {
-                        try {
-                            const elements = Array.from(document.querySelectorAll(selector));
-                            console.log(`DEBUG - Selector "${selector}" found ${elements.length} elements`);
-                            allElements = allElements.concat(elements);
-                        } catch (e) {
-                            console.log(`DEBUG - Selector "${selector}" failed`);
+                // Enhanced observer with better selectors
+                const enhancedObserver = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    // Look for message elements using multiple patterns
+                                    const isMessage = node.matches && (
+                                        node.matches('.mes') ||
+                                        node.matches('[class*="mes"]') ||
+                                        node.matches('.message') ||
+                                        node.matches('[class*="message"]') ||
+                                        node.querySelector('.mes') ||
+                                        node.querySelector('[class*="mes"]')
+                                    );
+                                    
+                                    if (isMessage) {
+                                        const messageText = node.textContent || node.innerText || '';
+                                        const cleanText = messageText.trim();
+                                        
+                                        // Filter out user messages and system content
+                                        const isUserMessage = cleanText.includes('Bambi') || 
+                                                            cleanText.includes('Please give me') ||
+                                                            cleanText.includes('1/1') ||
+                                                            cleanText.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/);
+                                        
+                                        if (!isUserMessage && cleanText.length > 50) {
+                                            console.log('DEBUG - New AI message detected via observer:', cleanText.substring(0, 80) + '...');
+                                            setTimeout(() => checkRepetition(cleanText, false), 200);
+                                        }
+                                    }
+                                }
+                            });
                         }
                     });
-                    
-                    console.log(`DEBUG - Total elements found: ${allElements.length}`);
-                    
-                    // Filter for potential AI messages
-                    const aiMessages = allElements.filter(el => {
-                        const text = el.textContent || '';
-                        const hasContent = text.length > 50;
-                        const notUser = !text.includes('Bambi') && !text.includes('Please give me') && !text.includes('1/1');
-                        const notTimestamp = !text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/);
-                        
-                        return hasContent && notUser && notTimestamp;
-                    });
-                    
-                    console.log(`DEBUG - Filtered AI messages: ${aiMessages.length}`);
-                    
-                    if (aiMessages.length > lastCheckedCount) {
-                        const newMessage = aiMessages[aiMessages.length - 1];
-                        const messageText = newMessage.textContent || '';
-                        
-                        console.log('DEBUG - Found new AI message via scanning:', messageText.substring(0, 100) + '...');
-                        setTimeout(() => checkRepetition(messageText.trim(), false), 100);
-                        
-                        lastCheckedCount = aiMessages.length;
-                    }
-                };
+                });
                 
-                // Run first scan immediately
-                setTimeout(scanForMessages, 2000);
+                // Watch the entire document for new message elements
+                enhancedObserver.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
                 
-                // Then scan every 5 seconds
-                const scanInterval = setInterval(scanForMessages, 5000);
-                console.log('DEBUG - Scan interval started, ID:', scanInterval);
+                console.log('DEBUG - Enhanced observer active - will detect AI messages when they appear');
                 
                 // Try to hook into SillyTavern's event system
                 console.log('DEBUG - Trying to hook into SillyTavern events...');
