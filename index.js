@@ -640,10 +640,12 @@ function manualCheckRecentMessages() {
         }
     });
     
+    console.log(`DEBUG - Total messages found: ${allMessages.length}`);
+    
     // Filter for AI messages only with better criteria
     const aiMessages = allMessages.filter(el => {
         const text = el.textContent || '';
-        const hasContent = text.length > 100; // Require longer content
+        const hasContent = text.length > 20; // Lower threshold
         
         // Exclude user messages, system UI, and metadata
         const excludePatterns = [
@@ -656,13 +658,16 @@ function manualCheckRecentMessages() {
             'Settings',
             'Extensions',
             'API Connections',
-            'Chat History'
+            'Chat History',
+            'Thinking'
         ];
         
         const isExcluded = excludePatterns.some(pattern => text.includes(pattern)) ||
                           text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/) || // Pure timestamps
                           text.match(/^#\d+/) || // Message IDs
-                          text.length < 100; // Too short to be real AI response
+                          text.length < 20; // Lower threshold
+        
+        console.log(`DEBUG - Message check: "${text.substring(0, 50)}..." length: ${text.length}, excluded: ${isExcluded}`);
         
         return hasContent && !isExcluded;
     });
