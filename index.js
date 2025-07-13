@@ -875,6 +875,7 @@ function setupEventListeners() {
                 };
                 
                 // Create working manual check function
+                console.log('DEBUG - About to create manual check function');
                 window.manualCheckRecentMessages = function() {
                     console.log('MANUAL CHECK - Starting manual pattern check');
                     
