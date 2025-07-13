@@ -710,8 +710,8 @@ function manualCheckRecentMessages() {
     });
 }
 
-    // Expose function globally for console access
-    window.manualCheckRecentMessages = manualCheckRecentMessages;
+// Expose function globally for console access
+window.manualCheckRecentMessages = manualCheckRecentMessages;
 
     // Initialize extension - use jQuery ready like the working extension
     jQuery(document).ready(function() {
