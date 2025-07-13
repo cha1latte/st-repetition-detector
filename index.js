@@ -254,6 +254,8 @@ function checkRepetition(text, isUser = false) {
     
     console.log('Repetition detector: Processing message:', cleanText.substring(0, 50) + '...');
     
+    console.log('DEBUG - About to check sensitivity map...');
+    
     // Map sensitivity to practical values
     const sensitivityMap = {
         1: { windowSize: 7, threshold: 4 },  // Low: needs more messages, higher threshold
@@ -262,11 +264,15 @@ function checkRepetition(text, isUser = false) {
     };
     
     const { windowSize, threshold } = sensitivityMap[settings.sensitivity] || sensitivityMap[2];
+    console.log('DEBUG - Sensitivity values:', { windowSize, threshold, sensitivity: settings.sensitivity });
     
     // Add message to history ONLY after passing all filtering
     messageHistory.push(cleanText);  // Use cleanText instead of original text
+    console.log('DEBUG - Added to history, new length:', messageHistory.length);
+    
     if (messageHistory.length > windowSize) {
         messageHistory.shift();
+        console.log('DEBUG - Trimmed history to windowSize, new length:', messageHistory.length);
     }
     
     // Only check if we have enough messages
@@ -275,6 +281,8 @@ function checkRepetition(text, isUser = false) {
         isProcessing = false;
         return;
     }
+    
+    console.log('DEBUG - Proceeding with pattern analysis, messages:', messageHistory.length);
     
     const recentMessages = messageHistory.slice(-windowSize);
     const detectedPatterns = [];
