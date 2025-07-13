@@ -614,19 +614,40 @@ function manualCheckRecentMessages() {
         }
     });
     
-    // Filter for AI messages only
+    // Filter for AI messages only with better criteria
     const aiMessages = allMessages.filter(el => {
         const text = el.textContent || '';
-        const hasContent = text.length > 50;
-        const notUser = !text.includes('Bambi') && 
-                       !text.includes('Please give me') && 
-                       !text.includes('1/1') &&
-                       !text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/);
+        const hasContent = text.length > 100; // Require longer content
         
-        return hasContent && notUser;
+        // Exclude user messages, system UI, and metadata
+        const excludePatterns = [
+            'Bambi',
+            'Please give me', 
+            '1/1',
+            'openrouter',
+            'Manual Check',
+            'Analyzing',
+            'Settings',
+            'Extensions',
+            'API Connections',
+            'Chat History'
+        ];
+        
+        const isExcluded = excludePatterns.some(pattern => text.includes(pattern)) ||
+                          text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/) || // Pure timestamps
+                          text.match(/^#\d+/) || // Message IDs
+                          text.length < 100; // Too short to be real AI response
+        
+        return hasContent && !isExcluded;
     });
     
     console.log(`DEBUG - Found ${aiMessages.length} potential AI messages`);
+    
+    // Debug: show what messages were found
+    aiMessages.forEach((msg, i) => {
+        const text = msg.textContent || '';
+        console.log(`DEBUG - AI Message ${i + 1}:`, text.substring(0, 100) + '...');
+    });
     
     if (aiMessages.length === 0) {
         toastr.info('No AI messages found to analyze.', 'Manual Check');
