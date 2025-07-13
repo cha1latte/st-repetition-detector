@@ -238,6 +238,9 @@ function checkRepetition(text, isUser = false) {
         cleanText.includes('Upload sprite pack') ||
         cleanText.includes('Vectorize All') ||
         cleanText.includes('Processed 0% of messages') ||
+        cleanText.includes('Manual CheckAnalyzing') ||
+        cleanText.includes('Analyzing') && cleanText.includes('recent AI messages') ||
+        cleanText.includes('No AI messages found to analyze') ||
         cleanText.length < 10) {
         console.log('DEBUG - Skipping UI element:', cleanText.substring(0, 30));
         return;
