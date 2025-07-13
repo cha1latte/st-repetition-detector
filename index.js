@@ -738,6 +738,29 @@ function setupEventListeners() {
                 
                 console.log('DEBUG - Manual test function created. Use: testRepetitionDetector("your test message")');
                 
+                // Simple message scanning - look for actual AI responses
+                let lastCheckedCount = 0;
+                setInterval(() => {
+                    // Look for AI message elements with specific content patterns
+                    const aiMessages = Array.from(document.querySelectorAll('.mes')).filter(el => {
+                        const text = el.textContent || '';
+                        return text.length > 50 && 
+                               !text.includes('1/1') && 
+                               !text.includes('Please give me') &&
+                               !el.classList.contains('user');
+                    });
+                    
+                    if (aiMessages.length > lastCheckedCount) {
+                        const newMessage = aiMessages[aiMessages.length - 1];
+                        const messageText = newMessage.textContent || '';
+                        
+                        console.log('DEBUG - Found new AI message via scanning:', messageText.substring(0, 50) + '...');
+                        testRepetitionDetector(messageText.trim());
+                        
+                        lastCheckedCount = aiMessages.length;
+                    }
+                }, 3000); // Check every 3 seconds
+                
                 // Try to hook into SillyTavern's event system
                 console.log('DEBUG - Trying to hook into SillyTavern events...');
                 
