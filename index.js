@@ -875,8 +875,8 @@ function setupEventListeners() {
                 };
                 
                 // Create working manual check function
-                console.log('DEBUG - About to create manual check function');
-                window.manualCheckRecentMessages = function() {
+                try {
+                    window.manualCheckRecentMessages = function() {
                     console.log('MANUAL CHECK - Starting manual pattern check');
                     
                     // Try multiple selectors to find AI messages
@@ -937,6 +937,9 @@ function setupEventListeners() {
                         }, index * 100);
                     });
                 };
+                } catch (error) {
+                    console.error('DEBUG - Error creating manual check function:', error);
+                }
                 
                 console.log('DEBUG - Manual test function created. Use: testRepetitionDetector("your test message")');
                 console.log('DEBUG - Manual check function created. Use: manualCheckRecentMessages()');
