@@ -621,100 +621,99 @@ function setupEventListeners() {
     document.getElementById('rd_check_now').addEventListener('click', function() {
         manualCheckRecentMessages();
     });
-}
-
-// Manual check function for the UI button
-console.log('DEBUG - About to define manualCheckRecentMessages function');
-function manualCheckRecentMessages() {
-    console.log('DEBUG - Manual check button clicked');
     
-    // Try multiple selectors to find AI messages
-    const selectors = ['.mes', '[class*="mes"]', '.message', '[class*="message"]'];
-    let allMessages = [];
-    
-    selectors.forEach(selector => {
-        try {
-            const elements = Array.from(document.querySelectorAll(selector));
-            allMessages = allMessages.concat(elements);
-        } catch (e) {
-            // Ignore failed selectors
+    // Manual check function for the UI button
+    console.log('DEBUG - About to define manualCheckRecentMessages function');
+    function manualCheckRecentMessages() {
+        console.log('DEBUG - Manual check button clicked');
+        
+        // Try multiple selectors to find AI messages
+        const selectors = ['.mes', '[class*="mes"]', '.message', '[class*="message"]'];
+        let allMessages = [];
+        
+        selectors.forEach(selector => {
+            try {
+                const elements = Array.from(document.querySelectorAll(selector));
+                allMessages = allMessages.concat(elements);
+            } catch (e) {
+                // Ignore failed selectors
+            }
+        });
+        
+        console.log(`DEBUG - Total messages found: ${allMessages.length}`);
+        
+        // Filter for AI messages only with better criteria
+        const aiMessages = allMessages.filter(el => {
+            const text = el.textContent || '';
+            const hasContent = text.length > 20; // Lower threshold
+            
+            // Exclude user messages, system UI, and metadata
+            const excludePatterns = [
+                'Bambi',
+                'Please give me', 
+                '1/1',
+                'openrouter',
+                'Manual Check',
+                'Analyzing',
+                'Settings',
+                'Extensions',
+                'API Connections',
+                'Chat History',
+                'Thinking'
+            ];
+            
+            const isExcluded = excludePatterns.some(pattern => text.includes(pattern)) ||
+                              text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/) || // Pure timestamps
+                              text.match(/^#\d+/) || // Message IDs
+                              text.length < 20; // Lower threshold
+            
+            console.log(`DEBUG - Message check: "${text.substring(0, 50)}..." length: ${text.length}, excluded: ${isExcluded}`);
+            
+            return hasContent && !isExcluded;
+        });
+        
+        console.log(`DEBUG - Found ${aiMessages.length} potential AI messages`);
+        
+        // Debug: show what messages were found
+        aiMessages.forEach((msg, i) => {
+            const text = msg.textContent || '';
+            console.log(`DEBUG - AI Message ${i + 1}:`, text.substring(0, 100) + '...');
+        });
+        
+        if (aiMessages.length === 0) {
+            toastr.info('No AI messages found to analyze.', 'Manual Check');
+            return;
         }
-    });
-    
-    console.log(`DEBUG - Total messages found: ${allMessages.length}`);
-    
-    // Filter for AI messages only with better criteria
-    const aiMessages = allMessages.filter(el => {
-        const text = el.textContent || '';
-        const hasContent = text.length > 20; // Lower threshold
         
-        // Exclude user messages, system UI, and metadata
-        const excludePatterns = [
-            'Bambi',
-            'Please give me', 
-            '1/1',
-            'openrouter',
-            'Manual Check',
-            'Analyzing',
-            'Settings',
-            'Extensions',
-            'API Connections',
-            'Chat History',
-            'Thinking'
-        ];
+        // Get the last 3-5 AI messages
+        const recentMessages = aiMessages.slice(-5);
+        console.log(`DEBUG - Analyzing last ${recentMessages.length} AI messages`);
         
-        const isExcluded = excludePatterns.some(pattern => text.includes(pattern)) ||
-                          text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/) || // Pure timestamps
-                          text.match(/^#\d+/) || // Message IDs
-                          text.length < 20; // Lower threshold
+        // Clear message history and process each message
+        messageHistory = [];
         
-        console.log(`DEBUG - Message check: "${text.substring(0, 50)}..." length: ${text.length}, excluded: ${isExcluded}`);
+        recentMessages.forEach((messageEl, index) => {
+            const messageText = messageEl.textContent || '';
+            const cleanText = messageText.trim();
+            
+            console.log(`DEBUG - Processing message ${index + 1}:`, cleanText.substring(0, 80) + '...');
+            
+            // Add to history and check for patterns
+            setTimeout(() => {
+                checkRepetition(cleanText, false);
+            }, index * 100); // Stagger the calls slightly
+        });
         
-        return hasContent && !isExcluded;
-    });
-    
-    console.log(`DEBUG - Found ${aiMessages.length} potential AI messages`);
-    
-    // Debug: show what messages were found
-    aiMessages.forEach((msg, i) => {
-        const text = msg.textContent || '';
-        console.log(`DEBUG - AI Message ${i + 1}:`, text.substring(0, 100) + '...');
-    });
-    
-    if (aiMessages.length === 0) {
-        toastr.info('No AI messages found to analyze.', 'Manual Check');
-        return;
+        // Show feedback that check is running
+        toastr.info(`Analyzing ${recentMessages.length} recent AI messages for patterns...`, 'Manual Check', {
+            timeOut: 3000
+        });
     }
     
-    // Get the last 3-5 AI messages
-    const recentMessages = aiMessages.slice(-5);
-    console.log(`DEBUG - Analyzing last ${recentMessages.length} AI messages`);
-    
-    // Clear message history and process each message
-    messageHistory = [];
-    
-    recentMessages.forEach((messageEl, index) => {
-        const messageText = messageEl.textContent || '';
-        const cleanText = messageText.trim();
-        
-        console.log(`DEBUG - Processing message ${index + 1}:`, cleanText.substring(0, 80) + '...');
-        
-        // Add to history and check for patterns
-        setTimeout(() => {
-            checkRepetition(cleanText, false);
-        }, index * 100); // Stagger the calls slightly
-    });
-    
-    // Show feedback that check is running
-    toastr.info(`Analyzing ${recentMessages.length} recent AI messages for patterns...`, 'Manual Check', {
-        timeOut: 3000
-    });
-}
-
-// Expose function globally for console access
-console.log('DEBUG - About to expose manualCheckRecentMessages to window');
-window.manualCheckRecentMessages = manualCheckRecentMessages;
-console.log('DEBUG - Function exposed, type is:', typeof window.manualCheckRecentMessages);
+    // Expose function globally for console access
+    console.log('DEBUG - About to expose manualCheckRecentMessages to window');
+    window.manualCheckRecentMessages = manualCheckRecentMessages;
+    console.log('DEBUG - Function exposed, type is:', typeof window.manualCheckRecentMessages);
 
     // Initialize extension - use jQuery ready like the working extension
     jQuery(document).ready(function() {
