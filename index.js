@@ -714,8 +714,9 @@ function setupEventListeners() {
     console.log('DEBUG - About to expose manualCheckRecentMessages to window');
     window.manualCheckRecentMessages = manualCheckRecentMessages;
     console.log('DEBUG - Function exposed, type is:', typeof window.manualCheckRecentMessages);
+}
 
-    // Initialize extension - use jQuery ready like the working extension
+// Initialize extension - use jQuery ready like the working extension
     jQuery(document).ready(function() {
         console.log('Repetition detector: jQuery ready fired');
         
