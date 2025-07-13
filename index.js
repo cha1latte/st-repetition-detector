@@ -235,7 +235,7 @@ function checkRepetition(text, isUser = false) {
     }
     
     // Skip SillyTavern UI elements and toast notifications
-    if (cleanText.includes('⚠️ Repetitive AI structure detected') ||
+    const isUIElement = cleanText.includes('⚠️ Repetitive AI structure detected') ||
         cleanText.includes('API Connections') ||
         cleanText.includes('Chat History') ||
         cleanText.includes('Group Controls') ||
@@ -243,11 +243,14 @@ function checkRepetition(text, isUser = false) {
         cleanText.includes('Upload sprite pack') ||
         cleanText.includes('Vectorize All') ||
         cleanText.includes('Processed 0% of messages') ||
-        cleanText.includes('Manual CheckAnalyzing') ||
-        cleanText.includes('Analyzing') && cleanText.includes('recent AI messages') ||
+        cleanText.includes('Manual Check') ||
+        cleanText.includes('Analyzing') ||
+        cleanText.includes('recent AI messages') ||
         cleanText.includes('No AI messages found to analyze') ||
-        cleanText.length < 10) {
-        console.log('DEBUG - Skipping UI element:', cleanText.substring(0, 30));
+        cleanText.length < 10;
+        
+    if (isUIElement) {
+        console.log('DEBUG - Skipping UI element:', cleanText.substring(0, 50));
         return;
     }
     
