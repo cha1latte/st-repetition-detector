@@ -120,3 +120,4 @@ console.log('✅ Sentence-Opener Detector loaded!');
 console.log('📝 Test with: testOpenerDetection()');
 console.log('➕ Add message: addMessage("your message text")');
 console.log('🗑️ Clear history: clearHistory()');
+console.log('Function available:', typeof window.testOpenerDetection);
