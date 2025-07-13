@@ -521,10 +521,12 @@ const MODULE_NAME = 'repetition-detector';
                 await createSettingsUI();
                 
                 // Create test function for console use
+                console.log('DEBUG - About to create test function');
                 window.testRepetitionDetector = function(testMessage) {
                     console.log('MANUAL TEST - Processing:', testMessage);
                     checkRepetition(testMessage, false);
                 };
+                console.log('DEBUG - Test function created successfully');
                 
                 console.log('AI Structure Repetition Detector extension loaded');
                 console.log('Test function available: testRepetitionDetector("your test message")');
