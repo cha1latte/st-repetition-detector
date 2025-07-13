@@ -624,6 +624,7 @@ function setupEventListeners() {
 }
 
 // Manual check function for the UI button
+console.log('DEBUG - About to define manualCheckRecentMessages function');
 function manualCheckRecentMessages() {
     console.log('DEBUG - Manual check button clicked');
     
@@ -711,7 +712,9 @@ function manualCheckRecentMessages() {
 }
 
 // Expose function globally for console access
+console.log('DEBUG - About to expose manualCheckRecentMessages to window');
 window.manualCheckRecentMessages = manualCheckRecentMessages;
+console.log('DEBUG - Function exposed, type is:', typeof window.manualCheckRecentMessages);
 
     // Initialize extension - use jQuery ready like the working extension
     jQuery(document).ready(function() {
