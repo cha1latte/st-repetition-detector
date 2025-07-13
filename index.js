@@ -238,7 +238,6 @@ function checkRepetition(text, isUser = false) {
     
     // Prevent duplicate processing of the same message
     const currentTime = Date.now();
-    const cleanText = text.trim();
     
     // Skip if we just processed this exact message or if called too frequently
     if (cleanText === lastProcessedMessage || (currentTime - lastProcessedTime) < 1000) {
