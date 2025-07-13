@@ -1,58 +1,16 @@
 <div id="repetition-detector-settings" class="inline-drawer">
     <div class="inline-drawer-toggle inline-drawer-header">
-        <b>AI Structure Repetition Detector</b>
+        <b>AI Repetition Detector</b>
         <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
     </div>
     <div class="inline-drawer-content">
         <div class="repetition-detector-block">
             <div class="toggle-description">
-                <label class="checkbox_label" for="rd_enabled">
-                    <input id="rd_enabled" type="checkbox" />
-                    <span>Enable structure repetition detection</span>
-                </label>
-            </div>
-            
-            <div class="repetition-settings-group">
-                <small class="notes">Detects when AI responses fall into repetitive structural patterns like sentence length, opening styles, or paragraph organization.</small>
-            </div>
-            
-            <div class="repetition-settings-group">
-                <button id="rd_check_now" class="menu_button" style="width: 100%; margin: 10px 0;">
-                    🔍 Check Recent Messages for Patterns
-                </button>
-                <small class="notes">Manually analyze the last few AI responses for repetitive patterns.</small>
-            </div>
-            
-            <div class="repetition-settings-group">
-                <label>Sensitivity:</label>
-                <div class="flex-container">
-                    <input type="range" id="rd_sensitivity" min="1" max="3" step="1" class="slider">
-                    <span id="rd_sensitivity_value" class="range-value"></span>
-                </div>
-                <small class="notes">How sensitive the detection is. Low = catches obvious repetition, High = catches subtle patterns.</small>
-            </div>
-            
-            <div class="repetition-settings-group">
-                <h4>Pattern Detection</h4>
-                <label class="checkbox_label" for="rd_check_sentence_structure">
-                    <input id="rd_check_sentence_structure" type="checkbox" />
-                    <span>Response flow patterns (sentence length rhythms, pacing similarities)</span>
-                </label>
-                
-                <label class="checkbox_label" for="rd_check_opening_patterns">
-                    <input id="rd_check_opening_patterns" type="checkbox" />
-                    <span>Opening style patterns (how responses typically begin)</span>
-                </label>
-                
-                <label class="checkbox_label" for="rd_check_paragraph_structure">
-                    <input id="rd_check_paragraph_structure" type="checkbox" />
-                    <span>Organization patterns (paragraph breaks, text structure)</span>
-                </label>
-                
-                <label class="checkbox_label" for="rd_check_dialogue_patterns">
-                    <input id="rd_check_dialogue_patterns" type="checkbox" />
-                    <span>Format patterns (dialogue vs narrative tendencies)</span>
-                </label>
+                <small class="notes">
+                    Simple pattern detection for AI responses. Use console functions to test:
+                    <br>• <code>testRepetition()</code> - Run pattern test
+                    <br>• <code>addMessage("text")</code> - Process a message
+                </small>
             </div>
         </div>
     </div>
