@@ -874,7 +874,71 @@ function setupEventListeners() {
                     checkRepetition(testMessage, false);
                 };
                 
+                // Create working manual check function
+                window.manualCheckRecentMessages = function() {
+                    console.log('MANUAL CHECK - Starting manual pattern check');
+                    
+                    // Try multiple selectors to find AI messages
+                    const selectors = ['.mes', '[class*="mes"]', '.message', '[class*="message"]'];
+                    let allMessages = [];
+                    
+                    selectors.forEach(selector => {
+                        try {
+                            const elements = Array.from(document.querySelectorAll(selector));
+                            console.log(`Found ${elements.length} elements with selector: ${selector}`);
+                            allMessages = allMessages.concat(elements);
+                        } catch (e) {
+                            console.log(`Selector failed: ${selector}`, e);
+                        }
+                    });
+                    
+                    console.log(`Total message elements found: ${allMessages.length}`);
+                    
+                    // Filter for AI messages
+                    const aiMessages = allMessages.filter((el, index) => {
+                        const text = el.textContent || '';
+                        const hasContent = text.length > 20;
+                        
+                        console.log(`Message ${index}: "${text.substring(0, 50)}..." (${text.length} chars)`);
+                        
+                        const excludePatterns = ['Bambi', 'Please give me', '1/1', 'openrouter', 'Manual Check', 'Analyzing', 'Thinking'];
+                        const isExcluded = excludePatterns.some(pattern => text.includes(pattern)) ||
+                                          text.match(/^\w+ \d{1,2}, \d{4} \d{1,2}:\d{2} [AP]M$/) ||
+                                          text.match(/^#\d+/) ||
+                                          text.length < 20;
+                        
+                        console.log(`  -> Excluded: ${isExcluded}, Has content: ${hasContent}`);
+                        
+                        return hasContent && !isExcluded;
+                    });
+                    
+                    console.log(`Found ${aiMessages.length} AI messages after filtering`);
+                    
+                    if (aiMessages.length === 0) {
+                        console.log('No AI messages found to analyze');
+                        return;
+                    }
+                    
+                    // Process recent messages
+                    const recentMessages = aiMessages.slice(-5);
+                    console.log(`Processing last ${recentMessages.length} messages`);
+                    
+                    messageHistory = [];
+                    
+                    recentMessages.forEach((messageEl, index) => {
+                        const messageText = messageEl.textContent || '';
+                        const cleanText = messageText.trim();
+                        
+                        console.log(`Processing message ${index + 1}: "${cleanText.substring(0, 80)}..."`);
+                        
+                        setTimeout(() => {
+                            checkRepetition(cleanText, false);
+                        }, index * 100);
+                    });
+                };
+                
                 console.log('DEBUG - Manual test function created. Use: testRepetitionDetector("your test message")');
+                console.log('DEBUG - Manual check function created. Use: manualCheckRecentMessages()');
                 
                 // Set up event-driven message detection (no timers)
                 console.log('DEBUG - Setting up event-driven message detection...');
