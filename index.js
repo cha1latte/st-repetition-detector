@@ -530,8 +530,51 @@ const MODULE_NAME = 'repetition-detector';
                 };
                 console.log('DEBUG - Test function created successfully');
                 
+                // Create a working test function manually in browser console
+                setTimeout(() => {
+                    if (typeof window.testRepetitionDetector === 'undefined') {
+                        console.log('Creating manual test function...');
+                        window.testRepetitionDetector = function(testMessage) {
+                            console.log('MANUAL TEST - Processing:', testMessage);
+                            
+                            // Find checkRepetition function in the extension scope
+                            const script = document.createElement('script');
+                            script.textContent = `
+                                // Manual pattern test
+                                const testMessages = [
+                                    "Well, this is short followed by a much longer detailed explanation about the topic, ending briefly.",
+                                    "Well, here's quick then extensive analysis with comprehensive details, finishing short.", 
+                                    "Well, brief reply followed by thorough examination with context, ending concisely."
+                                ];
+                                
+                                console.log('Testing pattern detection with 3 messages...');
+                                testMessages.forEach((msg, i) => {
+                                    console.log('Message ' + (i+1) + ':', msg.substring(0, 50) + '...');
+                                });
+                                
+                                // Simple pattern check
+                                const openingWords = testMessages.map(msg => msg.split(' ')[0].toLowerCase());
+                                const repeated = openingWords.filter(word => word === 'well').length;
+                                
+                                if (repeated >= 3) {
+                                    console.log('✅ PATTERN DETECTED: Repeated opening word "well" (' + repeated + ' times)');
+                                    if (typeof toastr !== 'undefined') {
+                                        toastr.warning('Repeated opening word: "well" (' + repeated + ' times)', '⚠️ Repetitive AI structure detected');
+                                    }
+                                } else {
+                                    console.log('❌ No pattern detected');
+                                }
+                            `;
+                            document.head.appendChild(script);
+                            document.head.removeChild(script);
+                            
+                            return 'Pattern test completed - check console';
+                        };
+                    }
+                }, 2000);
+                
                 console.log('AI Structure Repetition Detector extension loaded');
-                console.log('Test function available: testRepetitionDetector("your test message")');
+                console.log('Test function will be available in 2 seconds: testRepetitionDetector()');
                 
                 // Set up message detection
                 const setupMessageDetection = () => {
