@@ -214,6 +214,18 @@ function checkRepetition(text, isUser = false) {
         return;
     }
     
+    const cleanText = text.trim();
+    
+    // Skip UI elements before any processing
+    if (cleanText.includes('Manual Check') ||
+        cleanText.includes('Analyzing') ||
+        cleanText.includes('Thinking') ||
+        cleanText.includes('recent AI messages') ||
+        cleanText === 'Thinking...' ||
+        /^Manual Check.*Analyzing/.test(cleanText)) {
+        return;
+    }
+    
     console.log('DEBUG - checkRepetition called with:', text.substring(0, 50), 'isUser:', isUser);
     
     const settings = getSettings();
