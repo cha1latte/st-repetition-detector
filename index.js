@@ -746,6 +746,7 @@ function setupEventListeners() {
                 console.log('Repetition detector: Settings UI creation completed');
             } catch (error) {
                 console.error('Repetition detector: Error during initialization:', error);
+                console.error('Repetition detector: Error stack:', error.stack);
             }
             
             // Alternative message detection using DOM observation
