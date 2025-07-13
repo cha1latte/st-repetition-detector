@@ -209,6 +209,11 @@ function analyzeDialoguePattern(text) {
 
 // Check for repetitive patterns
 function checkRepetition(text, isUser = false) {
+    // Skip empty or very short text immediately
+    if (!text || text.trim().length < 10) {
+        return;
+    }
+    
     console.log('DEBUG - checkRepetition called with:', text.substring(0, 50), 'isUser:', isUser);
     
     const settings = getSettings();
@@ -246,8 +251,9 @@ function checkRepetition(text, isUser = false) {
         return;
     }
     
-    // Skip very short messages
+    // Skip very short or empty messages
     if (cleanText.length < 10) {
+        console.log('DEBUG - Skipping short message, length:', cleanText.length);
         return;
     }
     
