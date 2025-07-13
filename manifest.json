@@ -1,0 +1,7 @@
+{
+  "name": "Sentence-Opener Detector",
+  "version": "1.0.0",
+  "description": "Detects repetitive sentence openers in AI responses",
+  "main": "index.js",
+  "author": "AI Assistant"
+}
